@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+_BUILD_DIR=$1
+_CACHE_DIR=$2
+ENV_DIR=$3
+
+export_env_dir() {
+  env_dir=$1
+  acceptlist_regex=${2:-''}
+  denylist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
+  if [ -d "$env_dir" ]; then
+    for e in $(ls $env_dir); do
+      echo "$e" | grep -E "$acceptlist_regex" | grep -qvE "$denylist_regex" &&
+      export "$e=$(cat $env_dir/$e)"
+      :
+    done
+  fi
+}
+export_env_dir "$ENV_DIR"
+
+# Sets the value of an environment variable in the build environment
+#
+# Does not affect runtime. Future buildpacks will pick up this value
+# as they read in the $ENV_DIR like we did above.
+write_env_var() {
+    env_var_name=$1
+    env_var_value=$2
+
+    echo "$env_var_value" > "$ENV_DIR"/"$env_var_name"
+}
+
+
+echo "## It is Heroku build time!"
+echo
+
+# https://stackoverflow.com/questions/11362250/in-bash-how-do-i-test-if-a-variable-is-defined-in-u-mode
+if [[ -z "${ITS_HEROKU_BUILD_TIME-}" ]]; then
+    echo "Adding environment variable that's only visible at build time:"
+    echo
+    echo "    export ITS_HEROKU_BUILD_TIME=1"
+    echo
+    echo "Use this value in your app to detect if it's running on Heroku at build time."
+    echo "Ensure you've read all documentation and added print/warning output to all"
+    echo "branches of your code that use this value."
+    echo
+
+    write_env_var "ITS_HEROKU_BUILD_TIME" "1"
+
+    echo "Done!"
+    exit 0
+else
+  echo "Error: ITS_HEROKU_BUILD_TIME is already set. The value is ${ITS_HEROKU_BUILD_TIME}"
+  echo "       Ensure this buildpack is not configured to run twice by accident."
+  echo "       Ensure no \`heroku config\` values are setting this variable"
+  echo
+  exit 1
+fi

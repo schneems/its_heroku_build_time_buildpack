@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo "ITS_HEROKU_BUILD_TIME"
+exit 0
