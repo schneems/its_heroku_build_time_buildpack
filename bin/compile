@@ -32,23 +32,21 @@ write_env_var() {
 }
 
 
-echo "## It is Heroku build time!"
-echo
 
 # https://stackoverflow.com/questions/11362250/in-bash-how-do-i-test-if-a-variable-is-defined-in-u-mode
 if [[ -z "${ITS_HEROKU_BUILD_TIME-}" ]]; then
-    echo "Adding environment variable that's only visible at build time:"
+    echo "       Adding environment variable that's only visible at build time:"
     echo
-    echo "    export ITS_HEROKU_BUILD_TIME=1"
+    echo "           export ITS_HEROKU_BUILD_TIME=1"
     echo
-    echo "Use this value in your app to detect if it's running on Heroku at build time."
-    echo "Ensure you've read all documentation and added print/warning output to all"
-    echo "branches of your code that use this value."
+    echo "       Use this value in your app to detect if it's running on Heroku at build time."
+    echo "       Ensure you've read all documentation and added print/warning output to all"
+    echo "       branches of your code that use this value."
     echo
 
     write_env_var "ITS_HEROKU_BUILD_TIME" "1"
 
-    echo "Done!"
+    echo "       Done!"
     exit 0
 else
   echo "Error: ITS_HEROKU_BUILD_TIME is already set. The value is ${ITS_HEROKU_BUILD_TIME}"
